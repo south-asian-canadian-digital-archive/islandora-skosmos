@@ -1,0 +1,25 @@
+skos_export.settings:
+  type: config_object
+  label: 'SKOS Export settings'
+  mapping:
+    vocabularies:
+      type: sequence
+      label: 'Exported vocabularies, keyed by vocabulary machine name'
+      sequence:
+        type: mapping
+        mapping:
+          base_uri:
+            type: string
+            label: 'Concept namespace, absolute or a path such as /vocab/; must end in / or #'
+          title:
+            type: label
+            label: 'Concept scheme title'
+          language:
+            type: string
+            label: 'Label language tag'
+          id_field:
+            type: string
+            label: 'Optional field holding a stable identifier; the term UUID is used when empty'
+          match_field:
+            type: string
+            label: 'Optional link field whose URIs become skos:exactMatch'

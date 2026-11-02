@@ -1,0 +1,19 @@
+# Add to COMPOSE_FILE on any ISLE stack. Uses the stack's own Blazegraph.
+services:
+  skosmos:
+    image: quay.io/natlibfi/skosmos:${SKOSMOS_TAG:-v3.5}
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes:
+      - ${SKOSMOS_CONFIG:-./config/config.ttl}:/var/www/html/config.ttl:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.skosmos.rule=Host(`${DOMAIN}`) && PathPrefix(`/skosmos`)
+      - traefik.http.routers.skosmos.tls=true
+      - traefik.http.routers.skosmos.middlewares=skosmos-strip
+      - traefik.http.middlewares.skosmos-strip.stripprefix.prefixes=/skosmos
+      - traefik.http.services.skosmos.loadbalancer.server.port=80

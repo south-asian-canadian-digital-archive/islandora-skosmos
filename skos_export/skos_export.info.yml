@@ -1,0 +1,7 @@
+name: SKOS Export
+type: module
+description: Publishes configured taxonomy vocabularies as a SKOS concept scheme in Turtle.
+package: Islandora
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:taxonomy

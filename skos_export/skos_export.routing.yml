@@ -1,0 +1,7 @@
+skos_export.vocabulary:
+  path: '/skos-export/{vocabulary}'
+  defaults:
+    _controller: '\Drupal\skos_export\Controller\SkosExportController::export'
+  requirements:
+    _permission: 'access content'
+    vocabulary: '[a-z0-9_]+'
