@@ -86,6 +86,18 @@ Re-run `skos:config` and restart Skosmos whenever the list of published vocabula
 
 `/vocab` does the same for the scheme, except JSON-LD. `/skos-export/<vocabulary>` always returns the full Turtle dump and requires `access content`.
 
+## Links back to the term
+
+Each term in a published vocabulary gets a **Concept links** display component
+with its concept URI and Skosmos page. Rearrange or hide it under the
+vocabulary's Manage display. Term JSON-LD also gains `schema:sameAs` pointing at
+the concept URI. JSON:API does not include these links.
+
+They are derived on read from the public URL and identifier, and never stored.
+Viewing them does not save the term or queue a sync, and they are not exported
+as `skos:exactMatch`. Unpublished terms and terms without an identifier show
+nothing.
+
 ## Configuration
 
 Site settings in `skos_export.settings`:

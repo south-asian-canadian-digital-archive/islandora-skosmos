@@ -55,6 +55,30 @@ class SkosBuilder {
   }
 
   /**
+   * Returns a term's public links, or NULL when it has no published concept.
+   *
+   * Links are derived on read and never stored, so they cannot trigger a sync
+   * or appear in SKOS output.
+   *
+   * @return array{uri: string, skosmos: ?string}|null
+   *   The concept URI and, when Skosmos is configured, its page URL.
+   */
+  public function links(TermInterface $term): ?array {
+    $settings = $this->vocabularies()[$term->bundle()] ?? NULL;
+    $field = $settings['id_field'] ?? '';
+    if (!$field || !$term->isPublished() || !$term->hasField($field) || $term->get($field)->isEmpty()) {
+      return NULL;
+    }
+    $id = rawurlencode((string) $term->get($field)->value);
+    $path = rtrim((string) $this->configFactory->get('skos_export.settings')->get('skosmos_path'), '/');
+    $lang = $settings['language'] ?? 'en';
+    return [
+      'uri' => $this->namespace($settings) . $id,
+      'skosmos' => $path === '' ? NULL : "{$this->publicUrl()}$path/{$settings['short_name']}/$lang/page/$id",
+    ];
+  }
+
+  /**
    * Returns an unused opaque identifier. Random IDs are never reused.
    */
   public function mint(string $vid): string {

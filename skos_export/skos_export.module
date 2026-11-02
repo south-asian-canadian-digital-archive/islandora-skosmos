@@ -5,6 +5,10 @@
  * Keeps published identifiers permanent and syncs changed vocabularies.
  */
 
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\taxonomy\TermInterface;
 
 /**
@@ -62,4 +66,61 @@ function skos_export_taxonomy_term_delete(TermInterface $term): void {
  */
 function skos_export_cron(): void {
   \Drupal::service('skos_export.sync')->syncDirty();
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function skos_export_entity_extra_field_info(): array {
+  $extra = [];
+  foreach (array_keys(\Drupal::service('skos_export.builder')->vocabularies()) as $vid) {
+    $extra['taxonomy_term'][$vid]['display']['skos_export_links'] = [
+      'label' => t('Concept links'),
+      'description' => t('Concept URI and Skosmos page. Derived, never stored.'),
+      'weight' => 100,
+      'visible' => TRUE,
+    ];
+  }
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for taxonomy terms.
+ */
+function skos_export_taxonomy_term_view(array &$build, TermInterface $term, EntityViewDisplayInterface $display, string $view_mode): void {
+  if (!$display->getComponent('skos_export_links')) {
+    return;
+  }
+  $build['#cache']['tags'][] = 'config:skos_export.settings';
+  $build['#cache']['contexts'][] = 'url.site';
+  $links = \Drupal::service('skos_export.builder')->links($term);
+  if (!$links) {
+    return;
+  }
+  $items = [
+    ['#markup' => t('Concept URI:') . ' ', 'link' => Link::fromTextAndUrl($links['uri'], Url::fromUri($links['uri']))->toRenderable()],
+  ];
+  if ($links['skosmos']) {
+    $items[] = Link::fromTextAndUrl(t('View in Skosmos'), Url::fromUri($links['skosmos']))->toRenderable();
+  }
+  $build['skos_export_links'] = [
+    '#theme' => 'item_list',
+    '#items' => $items,
+    '#attributes' => ['class' => ['skos-export-links']],
+  ];
+}
+
+/**
+ * Implements hook_jsonld_alter_normalized_array().
+ */
+function skos_export_jsonld_alter_normalized_array(EntityInterface $entity, array &$normalized, array $context): void {
+  if (!$entity instanceof TermInterface || empty($normalized['@graph'])) {
+    return;
+  }
+  $links = \Drupal::service('skos_export.builder')->links($entity);
+  if (!$links) {
+    return;
+  }
+  $node = &$normalized['@graph'][array_key_first($normalized['@graph'])];
+  $node['http://schema.org/sameAs'][] = ['@id' => $links['uri']];
 }
