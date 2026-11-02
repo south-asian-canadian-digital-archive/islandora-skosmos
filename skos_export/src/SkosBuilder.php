@@ -110,6 +110,9 @@ class SkosBuilder {
         'broader' => [],
         'narrower' => [],
         'exactMatch' => [],
+        'altLabel' => $this->fieldValues($term, $settings['alt_label_field'] ?? ''),
+        'scopeNote' => $this->fieldValues($term, $settings['scope_note_field'] ?? ''),
+        'historyNote' => $this->fieldValues($term, $settings['history_note_field'] ?? ''),
       ];
     }
     foreach ($concepts as $tid => &$concept) {
@@ -130,6 +133,23 @@ class SkosBuilder {
       }
     }
     return $concepts;
+  }
+
+  /**
+   * Returns a term field's non-empty plain text values.
+   */
+  private function fieldValues(TermInterface $term, string $field): array {
+    if (!$field || !$term->hasField($field)) {
+      return [];
+    }
+    $values = [];
+    foreach ($term->get($field) as $item) {
+      $value = trim(strip_tags((string) $item->value));
+      if ($value !== '') {
+        $values[] = $value;
+      }
+    }
+    return $values;
   }
 
   /**
@@ -168,6 +188,7 @@ class SkosBuilder {
     $settings = $this->vocabularies()[$vid];
     $lang = $settings['language'] ?? 'en';
     $ids = static fn(array $uris) => array_map(static fn($uri) => ['@id' => $uri], $uris);
+    $text = static fn(array $values) => array_map(static fn($value) => ['@value' => $value, '@language' => $lang], $values);
     return array_filter([
       '@context' => ['skos' => 'http://www.w3.org/2004/02/skos/core#'],
       '@id' => $concept['uri'],
@@ -175,6 +196,9 @@ class SkosBuilder {
       'skos:inScheme' => ['@id' => $this->schemeUri($settings)],
       'skos:prefLabel' => ['@value' => $concept['label'], '@language' => $lang],
       'skos:definition' => $concept['definition'] === '' ? NULL : ['@value' => $concept['definition'], '@language' => $lang],
+      'skos:altLabel' => $text($concept['altLabel']),
+      'skos:scopeNote' => $text($concept['scopeNote']),
+      'skos:historyNote' => $text($concept['historyNote']),
       'skos:broader' => $ids($concept['broader']),
       'skos:narrower' => $ids($concept['narrower']),
       'skos:exactMatch' => $ids($concept['exactMatch']),
@@ -246,6 +270,11 @@ class SkosBuilder {
     $lines = ['a skos:Concept', "skos:inScheme <$scheme>", 'skos:prefLabel ' . $this->literal($concept['label'], $lang)];
     if ($concept['definition'] !== '') {
       $lines[] = 'skos:definition ' . $this->literal($concept['definition'], $lang);
+    }
+    foreach (['altLabel', 'scopeNote', 'historyNote'] as $property) {
+      foreach ($concept[$property] as $value) {
+        $lines[] = "skos:$property " . $this->literal($value, $lang);
+      }
     }
     if (!$concept['broader']) {
       $lines[] = "skos:topConceptOf <$scheme>";

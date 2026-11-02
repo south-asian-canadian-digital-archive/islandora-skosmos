@@ -47,3 +47,12 @@ skos_export.settings:
           match_field:
             type: string
             label: 'Optional link field whose URIs become skos:exactMatch'
+          alt_label_field:
+            type: string
+            label: 'Field published as skos:altLabel'
+          scope_note_field:
+            type: string
+            label: 'Field published as skos:scopeNote'
+          history_note_field:
+            type: string
+            label: 'Field published as skos:historyNote'

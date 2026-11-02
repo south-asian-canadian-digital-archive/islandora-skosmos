@@ -74,6 +74,7 @@ class SettingsForm extends ConfigFormBase {
     $published = $config->get('vocabularies') ?? [];
     foreach (\Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->loadMultiple() as $vid => $vocabulary) {
       $settings = $published[$vid] ?? [];
+      $notes = ['' => $this->t('None')] + $this->fields($vid, ['string', 'string_long', 'text', 'text_long']);
       $checked = [':input[name="vocabularies[' . $vid . '][enabled]"]' => ['checked' => TRUE]];
       $form['vocabularies'][$vid] = [
         '#type' => 'details',
@@ -102,6 +103,25 @@ class SettingsForm extends ConfigFormBase {
           '#title' => $this->t('Authority link field'),
           '#options' => ['' => $this->t('None')] + $this->fields($vid, ['link', 'authority_link']),
           '#default_value' => $settings['match_field'] ?? '',
+        ],
+        'alt_label_field' => [
+          '#type' => 'select',
+          '#title' => $this->t('Alternative label field'),
+          '#options' => $notes,
+          '#default_value' => $settings['alt_label_field'] ?? '',
+        ],
+        'scope_note_field' => [
+          '#type' => 'select',
+          '#title' => $this->t('Scope note field'),
+          '#options' => $notes,
+          '#default_value' => $settings['scope_note_field'] ?? '',
+        ],
+        'history_note_field' => [
+          '#type' => 'select',
+          '#title' => $this->t('History note field'),
+          '#options' => $notes,
+          '#default_value' => $settings['history_note_field'] ?? '',
+          '#description' => $this->t('Every mapped field is published. Never map internal or editorial notes. The term description is published as skos:definition.'),
         ],
       ];
       foreach (['short_name', 'title', 'base_uri', 'language'] as $key) {
