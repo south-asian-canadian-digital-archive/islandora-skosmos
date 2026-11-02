@@ -1,0 +1,5 @@
+skos_export.settings:
+  title: 'SKOS export'
+  description: 'Choose which taxonomy vocabularies are published as SKOS.'
+  route_name: skos_export.settings
+  parent: system.admin_config_services

@@ -1,0 +1,9 @@
+{
+  "name": "islandora-skosmos/skos_export",
+  "description": "Publish Islandora taxonomy vocabularies as SKOS and browse them with Skosmos.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "drupal/core": "^10.3 || ^11"
+  }
+}

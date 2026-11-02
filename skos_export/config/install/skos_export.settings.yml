@@ -1,1 +1,7 @@
+public_url: ''
+skosmos_path: /skosmos
+service_name: 'Vocabularies'
+store_type: blazegraph
+store_url: 'http://blazegraph:8080/bigdata/namespace/skosmos/sparql'
+sparql_endpoint: 'http://blazegraph:8080/bigdata/namespace/skosmos/sparql'
 vocabularies: {}

@@ -1,0 +1,4 @@
+administer skos export:
+  title: 'Administer SKOS export'
+  description: 'Choose published vocabularies and set their URI namespaces. Changing a namespace breaks published URIs.'
+  restrict access: true

@@ -1,3 +1,10 @@
+skos_export.settings:
+  path: '/admin/config/services/skos-export'
+  defaults:
+    _form: '\Drupal\skos_export\Form\SettingsForm'
+    _title: 'SKOS export'
+  requirements:
+    _permission: 'administer skos export'
 skos_export.vocabulary:
   path: '/skos-export/{vocabulary}'
   defaults:
@@ -5,3 +12,5 @@ skos_export.vocabulary:
   requirements:
     _permission: 'access content'
     vocabulary: '[a-z0-9_]+'
+route_callbacks:
+  - '\Drupal\skos_export\Routing\ConceptRoutes::routes'

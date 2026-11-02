@@ -2,15 +2,36 @@ skos_export.settings:
   type: config_object
   label: 'SKOS Export settings'
   mapping:
+    public_url:
+      type: string
+      label: 'Public site URL; empty resolves against the request host'
+    skosmos_path:
+      type: string
+      label: 'Public path of Skosmos; empty if not used'
+    service_name:
+      type: label
+      label: 'Skosmos service name'
+    store_type:
+      type: string
+      label: 'Store protocol: blazegraph or graph_store'
+    store_url:
+      type: string
+      label: 'Write URL of the store, reachable from Drupal'
+    sparql_endpoint:
+      type: string
+      label: 'SPARQL endpoint, reachable from Skosmos'
     vocabularies:
       type: sequence
-      label: 'Exported vocabularies, keyed by vocabulary machine name'
+      label: 'Published vocabularies, keyed by vocabulary machine name'
       sequence:
         type: mapping
         mapping:
+          short_name:
+            type: string
+            label: 'Skosmos short name'
           base_uri:
             type: string
-            label: 'Concept namespace, absolute or a path such as /vocab/; must end in / or #'
+            label: 'Concept namespace, absolute or a path; must end in / or #'
           title:
             type: label
             label: 'Concept scheme title'
@@ -19,7 +40,10 @@ skos_export.settings:
             label: 'Label language tag'
           id_field:
             type: string
-            label: 'Optional field holding a stable identifier; the term UUID is used when empty'
+            label: 'Text field holding the permanent identifier'
+          id_prefix:
+            type: string
+            label: 'Prefix for minted identifiers'
           match_field:
             type: string
             label: 'Optional link field whose URIs become skos:exactMatch'

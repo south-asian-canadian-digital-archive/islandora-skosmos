@@ -1,0 +1,7 @@
+services:
+  skos_export.builder:
+    class: Drupal\skos_export\SkosBuilder
+    arguments: ['@config.factory', '@entity_type.manager', '@request_stack']
+  skos_export.sync:
+    class: Drupal\skos_export\SkosSync
+    arguments: ['@config.factory', '@skos_export.builder', '@http_client', '@state']

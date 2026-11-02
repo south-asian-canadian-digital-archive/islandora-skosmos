@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Keeps published identifiers permanent and syncs changed vocabularies.
+ */
+
+use Drupal\taxonomy\TermInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for taxonomy terms.
+ *
+ * Mints a missing identifier and refuses to change an existing one.
+ */
+function skos_export_taxonomy_term_presave(TermInterface $term): void {
+  $settings = \Drupal::config('skos_export.settings')->get('vocabularies.' . $term->bundle());
+  $field = $settings['id_field'] ?? '';
+  if (!$field || !$term->hasField($field)) {
+    return;
+  }
+  $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $original = $term->isNew() ? NULL : $storage->loadUnchanged($term->id());
+  $published = $original ? (string) $original->get($field)->value : '';
+  if ($published !== '') {
+    if ((string) $term->get($field)->value !== $published) {
+      \Drupal::logger('skos_export')->warning('Kept identifier @id on term @tid: published identifiers never change.', [
+        '@id' => $published,
+        '@tid' => $term->id(),
+      ]);
+      $term->set($field, $published);
+    }
+    return;
+  }
+  if ((string) $term->get($field)->value === '') {
+    $term->set($field, \Drupal::service('skos_export.builder')->mint($term->bundle()));
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for taxonomy terms.
+ */
+function skos_export_taxonomy_term_insert(TermInterface $term): void {
+  \Drupal::service('skos_export.sync')->markDirty($term->bundle());
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for taxonomy terms.
+ */
+function skos_export_taxonomy_term_update(TermInterface $term): void {
+  \Drupal::service('skos_export.sync')->markDirty($term->bundle());
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for taxonomy terms.
+ */
+function skos_export_taxonomy_term_delete(TermInterface $term): void {
+  \Drupal::service('skos_export.sync')->markDirty($term->bundle());
+}
+
+/**
+ * Implements hook_cron().
+ */
+function skos_export_cron(): void {
+  \Drupal::service('skos_export.sync')->syncDirty();
+}
